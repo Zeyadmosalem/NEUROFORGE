@@ -1,0 +1,9 @@
+# Five-minute demo — V2 four minds + memory glitches
+
+1. **00:00–00:45:** Run `python run_demo.py --arena`; point out four simultaneous autonomous players and distinct current chunk names, challenge budgets, search expansion counters and levels. The search algorithm controls movement, the NN coaches next-level difficulty and CSP builds levels.
+2. **00:45–01:45:** Press `+` twice for accelerated attempts. Show agents collecting independent wins and losses and progressing toward harder sections, including airborne hazards. Explain that deterministic game physics is shared between player, search and verifier.
+3. **01:45–02:45:** At an online count boundary, show `NEW x/10` resetting to `0/10` and `ONLINE` incrementing. Point to the stored 13-parameter per-agent calibration head, which updates on ten **new** attempts only; the original NN never changes.
+4. **02:45–03:45:** Press `X` to deliberately forget some learned adapter weights (or run `--arena-headless --rounds 34` to demonstrate the scheduled third-update glitch). Show the text `MEMORY GLITCH` and subsequent `RE-LEARNING`. Mention 12% train-time feature dropout versus deliberate 35% adapter weight erasure; they are different techniques. Next two fresh updates use 1.4× learning rate. Press `D` to disable scheduled glitches as an ablation.
+5. **03:45–05:00:** Press `M` for human mode, `Tab` for AI Lab; switch BFS/DFS/A*/Greedy with `1`–`4`, and toggle FC/AC-3 with `F`/`C`. End with real plots and results from `eval/run_experiments.py`. State clearly that synthetic win probabilities and human skill adaptation are not clinically/scientifically validated; explain how real manual gameplay is logged locally for future validation.
+
+**Backup when the Pygame window cannot open:** `python run_demo.py --arena-headless --rounds 34` and `python -m pytest tests -v`. For the graphical appearance show `assets/arena_preview.png` as an offline visualization, not as a Pygame screenshot.
