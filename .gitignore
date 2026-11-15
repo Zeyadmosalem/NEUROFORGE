@@ -1,0 +1,14 @@
+__pycache__/
+.pytest_cache/
+*.py[cod]
+.venv/
+.env
+.DS_Store
+# optional personal telemetry: do not commit without consent
+data/generated/human_gameplay.jsonl
+# local play state written by the game and the arena
+data/generated/algorithm_gameplay.jsonl
+models/online/
+results/arena_screenshot.png
+# downloaded by `python -m data.make_data` (pinned commit, SHA-256 checked)
+data/generated/vglc_raw/
