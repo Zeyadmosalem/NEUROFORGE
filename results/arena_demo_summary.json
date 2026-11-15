@@ -1,0 +1,549 @@
+{
+  "seed": 23,
+  "rounds": 2,
+  "agents": [
+    {
+      "agent": "bfs",
+      "completed": 2,
+      "wins": 2,
+      "losses": 0,
+      "win_rate": 1.0,
+      "challenge": 0.474,
+      "level_difficulty": 0.515,
+      "level_chunks": [
+        "meadow",
+        "pinnacle",
+        "hops",
+        "pinnacle",
+        "thorns",
+        "coins"
+      ],
+      "search_expanded": 603,
+      "search_path_length": 45,
+      "surprises_this_stage": 0,
+      "total_surprises": 4,
+      "surprise_attempts": 5,
+      "surprises_enabled": true,
+      "current_world_events": [],
+      "online_updates": 0,
+      "new_examples_pending": 2,
+      "forget_events": 0,
+      "forget_every_updates": 3,
+      "feature_dropout": 0.12,
+      "prequential_losses": [],
+      "last_forget_event": null,
+      "recovery_updates_remaining": 0,
+      "frozen_base_model": true
+    },
+    {
+      "agent": "dfs",
+      "completed": 2,
+      "wins": 2,
+      "losses": 0,
+      "win_rate": 1.0,
+      "challenge": 0.434,
+      "level_difficulty": 0.515,
+      "level_chunks": [
+        "meadow",
+        "gatekeeper",
+        "gap1",
+        "pinnacle",
+        "thorns",
+        "coins"
+      ],
+      "search_expanded": 50,
+      "search_path_length": 49,
+      "surprises_this_stage": 0,
+      "total_surprises": 4,
+      "surprise_attempts": 5,
+      "surprises_enabled": true,
+      "current_world_events": [],
+      "online_updates": 0,
+      "new_examples_pending": 2,
+      "forget_events": 0,
+      "forget_every_updates": 3,
+      "feature_dropout": 0.12,
+      "prequential_losses": [],
+      "last_forget_event": null,
+      "recovery_updates_remaining": 0,
+      "frozen_base_model": true
+    },
+    {
+      "agent": "astar",
+      "completed": 2,
+      "wins": 2,
+      "losses": 0,
+      "win_rate": 1.0,
+      "challenge": 0.594,
+      "level_difficulty": 0.662,
+      "level_chunks": [
+        "meadow",
+        "gatekeeper",
+        "springboard",
+        "thorns",
+        "pulse_gate",
+        "coins"
+      ],
+      "search_expanded": 272,
+      "search_path_length": 45,
+      "surprises_this_stage": 0,
+      "total_surprises": 5,
+      "surprise_attempts": 6,
+      "surprises_enabled": true,
+      "current_world_events": [],
+      "online_updates": 0,
+      "new_examples_pending": 2,
+      "forget_events": 0,
+      "forget_every_updates": 3,
+      "feature_dropout": 0.12,
+      "prequential_losses": [],
+      "last_forget_event": null,
+      "recovery_updates_remaining": 0,
+      "frozen_base_model": true
+    },
+    {
+      "agent": "greedy",
+      "completed": 2,
+      "wins": 2,
+      "losses": 0,
+      "win_rate": 1.0,
+      "challenge": 0.534,
+      "level_difficulty": 0.588,
+      "level_chunks": [
+        "meadow",
+        "springboard",
+        "gatekeeper",
+        "patrol_lane",
+        "hops",
+        "coins"
+      ],
+      "search_expanded": 47,
+      "search_path_length": 45,
+      "surprises_this_stage": 0,
+      "total_surprises": 5,
+      "surprise_attempts": 6,
+      "surprises_enabled": true,
+      "current_world_events": [],
+      "online_updates": 0,
+      "new_examples_pending": 2,
+      "forget_events": 0,
+      "forget_every_updates": 3,
+      "feature_dropout": 0.12,
+      "prequential_losses": [],
+      "last_forget_event": null,
+      "recovery_updates_remaining": 0,
+      "frozen_base_model": true
+    }
+  ],
+  "attempts": {
+    "bfs": [
+      {
+        "won": 1,
+        "elapsed": 4.5,
+        "jumps": 1,
+        "landings": 0,
+        "progress": 1.0,
+        "seed": 332,
+        "difficulty": 0.36764705882352944,
+        "chunks": [
+          "meadow",
+          "hops",
+          "gap1",
+          "springboard",
+          "hops",
+          "coins"
+        ],
+        "origin": "algorithm",
+        "owner": "arena_bfs",
+        "surprise_count": 2,
+        "unexpected_events": [
+          {
+            "tick": 12,
+            "kind": "bridge_rises",
+            "description": "BRIDGE RISES AT X=19",
+            "x": 19,
+            "new_plan_cost": 34,
+            "search_expanded": 499
+          },
+          {
+            "tick": 29,
+            "kind": "spike_bloom",
+            "description": "NEW SPIKE AT X=43",
+            "x": 43,
+            "new_plan_cost": 17,
+            "search_expanded": 341
+          }
+        ],
+        "replans": 2,
+        "algorithm": "bfs",
+        "reason": "goal",
+        "predicted_win_before": 0.762331,
+        "prediction_squared_error": 0.056486,
+        "planned_path_length": 17,
+        "search_expanded": 341,
+        "challenge_after": 0.373,
+        "online_adapter_updated": false,
+        "forgetting_event": null
+      },
+      {
+        "won": 1,
+        "elapsed": 4.6,
+        "jumps": 3,
+        "landings": 3,
+        "progress": 1.0,
+        "seed": 1478,
+        "difficulty": 0.4411764705882353,
+        "chunks": [
+          "meadow",
+          "gap1",
+          "thorns",
+          "springboard",
+          "hops",
+          "coins"
+        ],
+        "origin": "algorithm",
+        "owner": "arena_bfs",
+        "surprise_count": 2,
+        "unexpected_events": [
+          {
+            "tick": 17,
+            "kind": "coin_shower",
+            "description": "SURPRISE COINS APPEAR",
+            "x": 23,
+            "new_plan_cost": 30,
+            "search_expanded": 438
+          },
+          {
+            "tick": 33,
+            "kind": "new_patrol",
+            "description": "NEW PATROL AT X=39",
+            "x": 39,
+            "new_plan_cost": 14,
+            "search_expanded": 1619
+          }
+        ],
+        "replans": 3,
+        "algorithm": "bfs",
+        "reason": "goal",
+        "predicted_win_before": 0.000569,
+        "prediction_squared_error": 0.998863,
+        "planned_path_length": 14,
+        "search_expanded": 1619,
+        "challenge_after": 0.474,
+        "online_adapter_updated": false,
+        "forgetting_event": null
+      }
+    ],
+    "dfs": [
+      {
+        "won": 1,
+        "elapsed": 4.6,
+        "jumps": 9,
+        "landings": 6,
+        "progress": 1.0,
+        "seed": 1335,
+        "difficulty": 0.22058823529411764,
+        "chunks": [
+          "meadow",
+          "gap1",
+          "hops",
+          "gap1",
+          "meadow",
+          "coins"
+        ],
+        "origin": "algorithm",
+        "owner": "arena_dfs",
+        "surprise_count": 2,
+        "unexpected_events": [
+          {
+            "tick": 16,
+            "kind": "new_patrol",
+            "description": "NEW PATROL AT X=33",
+            "x": 33,
+            "new_plan_cost": 33,
+            "search_expanded": 35
+          },
+          {
+            "tick": 28,
+            "kind": "patrol_switch",
+            "description": "PATROL CHANGES TIMING",
+            "x": 33,
+            "new_plan_cost": 21,
+            "search_expanded": 23
+          }
+        ],
+        "replans": 4,
+        "algorithm": "dfs",
+        "reason": "goal",
+        "predicted_win_before": 0.989991,
+        "prediction_squared_error": 0.0001,
+        "planned_path_length": 16,
+        "search_expanded": 17,
+        "challenge_after": 0.333,
+        "online_adapter_updated": false,
+        "forgetting_event": null
+      },
+      {
+        "won": 1,
+        "elapsed": 4.5,
+        "jumps": 7,
+        "landings": 6,
+        "progress": 1.0,
+        "seed": 2584,
+        "difficulty": 0.4411764705882353,
+        "chunks": [
+          "meadow",
+          "hops",
+          "gap1",
+          "thorns",
+          "gatekeeper",
+          "coins"
+        ],
+        "origin": "algorithm",
+        "owner": "arena_dfs",
+        "surprise_count": 2,
+        "unexpected_events": [
+          {
+            "tick": 18,
+            "kind": "new_patrol",
+            "description": "NEW PATROL AT X=30",
+            "x": 30,
+            "new_plan_cost": 28,
+            "search_expanded": 29
+          },
+          {
+            "tick": 35,
+            "kind": "new_patrol",
+            "description": "NEW PATROL AT X=41",
+            "x": 41,
+            "new_plan_cost": 11,
+            "search_expanded": 12
+          }
+        ],
+        "replans": 2,
+        "algorithm": "dfs",
+        "reason": "goal",
+        "predicted_win_before": 0.954769,
+        "prediction_squared_error": 0.002046,
+        "planned_path_length": 11,
+        "search_expanded": 12,
+        "challenge_after": 0.434,
+        "online_adapter_updated": false,
+        "forgetting_event": null
+      }
+    ],
+    "astar": [
+      {
+        "won": 1,
+        "elapsed": 4.5,
+        "jumps": 2,
+        "landings": 2,
+        "progress": 1.0,
+        "seed": 2235,
+        "difficulty": 0.29411764705882354,
+        "chunks": [
+          "meadow",
+          "gap1",
+          "hops",
+          "gap1",
+          "hops",
+          "coins"
+        ],
+        "origin": "algorithm",
+        "owner": "arena_astar",
+        "surprise_count": 2,
+        "unexpected_events": [
+          {
+            "tick": 18,
+            "kind": "coin_shower",
+            "description": "SURPRISE COINS APPEAR",
+            "x": 30,
+            "new_plan_cost": 28,
+            "search_expanded": 168
+          },
+          {
+            "tick": 30,
+            "kind": "coin_shower",
+            "description": "SURPRISE COINS APPEAR",
+            "x": 40,
+            "new_plan_cost": 16,
+            "search_expanded": 66
+          }
+        ],
+        "replans": 2,
+        "algorithm": "astar",
+        "reason": "goal",
+        "predicted_win_before": 0.687665,
+        "prediction_squared_error": 0.097553,
+        "planned_path_length": 16,
+        "search_expanded": 66,
+        "challenge_after": 0.493,
+        "online_adapter_updated": false,
+        "forgetting_event": null
+      },
+      {
+        "won": 1,
+        "elapsed": 4.5,
+        "jumps": 3,
+        "landings": 2,
+        "progress": 1.0,
+        "seed": 3484,
+        "difficulty": 0.5147058823529412,
+        "chunks": [
+          "meadow",
+          "springboard",
+          "hops",
+          "thorns",
+          "springboard",
+          "coins"
+        ],
+        "origin": "algorithm",
+        "owner": "arena_astar",
+        "surprise_count": 3,
+        "unexpected_events": [
+          {
+            "tick": 11,
+            "kind": "new_patrol",
+            "description": "NEW PATROL AT X=19",
+            "x": 19,
+            "new_plan_cost": 35,
+            "search_expanded": 202
+          },
+          {
+            "tick": 24,
+            "kind": "coin_shower",
+            "description": "SURPRISE COINS APPEAR",
+            "x": 32,
+            "new_plan_cost": 22,
+            "search_expanded": 89
+          },
+          {
+            "tick": 38,
+            "kind": "spike_bloom",
+            "description": "NEW SPIKE AT X=42",
+            "x": 42,
+            "new_plan_cost": 8,
+            "search_expanded": 23
+          }
+        ],
+        "replans": 3,
+        "algorithm": "astar",
+        "reason": "goal",
+        "predicted_win_before": 0.989862,
+        "prediction_squared_error": 0.000103,
+        "planned_path_length": 8,
+        "search_expanded": 23,
+        "challenge_after": 0.594,
+        "online_adapter_updated": false,
+        "forgetting_event": null
+      }
+    ],
+    "greedy": [
+      {
+        "won": 1,
+        "elapsed": 4.9,
+        "jumps": 1,
+        "landings": 1,
+        "progress": 1.0,
+        "seed": 3238,
+        "difficulty": 0.29411764705882354,
+        "chunks": [
+          "meadow",
+          "gap1",
+          "hops",
+          "gap1",
+          "hops",
+          "coins"
+        ],
+        "origin": "algorithm",
+        "owner": "arena_greedy",
+        "surprise_count": 2,
+        "unexpected_events": [
+          {
+            "tick": 13,
+            "kind": "bridge_rises",
+            "description": "BRIDGE RISES AT X=27",
+            "x": 27,
+            "new_plan_cost": 35,
+            "search_expanded": 36
+          },
+          {
+            "tick": 29,
+            "kind": "coin_shower",
+            "description": "SURPRISE COINS APPEAR",
+            "x": 39,
+            "new_plan_cost": 21,
+            "search_expanded": 22
+          }
+        ],
+        "replans": 4,
+        "algorithm": "greedy",
+        "reason": "goal",
+        "predicted_win_before": 0.687665,
+        "prediction_squared_error": 0.097553,
+        "planned_path_length": 21,
+        "search_expanded": 22,
+        "challenge_after": 0.433,
+        "online_adapter_updated": false,
+        "forgetting_event": null
+      },
+      {
+        "won": 1,
+        "elapsed": 4.8,
+        "jumps": 3,
+        "landings": 2,
+        "progress": 1.0,
+        "seed": 4487,
+        "difficulty": 0.4411764705882353,
+        "chunks": [
+          "meadow",
+          "gap1",
+          "hops",
+          "pinnacle",
+          "springboard",
+          "coins"
+        ],
+        "origin": "algorithm",
+        "owner": "arena_greedy",
+        "surprise_count": 3,
+        "unexpected_events": [
+          {
+            "tick": 13,
+            "kind": "coin_shower",
+            "description": "SURPRISE COINS APPEAR",
+            "x": 24,
+            "new_plan_cost": 33,
+            "search_expanded": 34
+          },
+          {
+            "tick": 25,
+            "kind": "spike_bloom",
+            "description": "NEW SPIKE AT X=41",
+            "x": 41,
+            "new_plan_cost": 21,
+            "search_expanded": 23
+          },
+          {
+            "tick": 41,
+            "kind": "spike_bloom",
+            "description": "NEW SPIKE AT X=43",
+            "x": 43,
+            "new_plan_cost": 7,
+            "search_expanded": 9
+          }
+        ],
+        "replans": 6,
+        "algorithm": "greedy",
+        "reason": "goal",
+        "predicted_win_before": 0.928,
+        "prediction_squared_error": 0.005184,
+        "planned_path_length": 7,
+        "search_expanded": 8,
+        "challenge_after": 0.534,
+        "online_adapter_updated": false,
+        "forgetting_event": null
+      }
+    ]
+  },
+  "note": "Four search-driven surrogate agents, not human results"
+}

@@ -1,0 +1,5 @@
+mode,n,solved_mean,solved_std,assignments_mean,assignments_std,backtracks_mean,backtracks_std,pruned_mean,pruned_std,constraint_checks_mean,constraint_checks_std,elapsed_ms_mean,elapsed_ms_std
+FC0_AC30,5,1.0,0.0,17.4,11.4149,6.4,10.8305,0.0,0.0,23.2,22.687,0.5456,0.0766
+FC1_AC30,5,1.0,0.0,20.6,23.7023,10.6,23.7023,11.6,0.8944,378.4,63.5043,0.6608,0.1936
+FC0_AC31,5,1.0,0.0,20.6,23.7023,10.6,23.7023,11.6,0.8944,1341.6,110.909,1.7008,0.3721
+FC1_AC31,5,1.0,0.0,20.6,23.7023,10.6,23.7023,11.6,0.8944,1444.2,126.788,1.4932,0.2919

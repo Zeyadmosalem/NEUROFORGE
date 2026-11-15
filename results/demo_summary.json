@@ -1,0 +1,52 @@
+{
+  "seed": 5,
+  "level_chunks": [
+    "meadow",
+    "pinnacle",
+    "sanctuary",
+    "springboard",
+    "sanctuary",
+    "coins"
+  ],
+  "predicted_success": 0.8196665945952923,
+  "csp_stats": {
+    "assignments": 8,
+    "backtracks": 2,
+    "pruned": 5,
+    "constraint_checks": 778,
+    "arc_revisions": 26,
+    "elapsed_ms": 0.814
+  },
+  "search": {
+    "bfs": {
+      "found": true,
+      "nodes_expanded": 514,
+      "nodes_generated": 520,
+      "path_cost": 45,
+      "elapsed_ms": 5.633
+    },
+    "dfs": {
+      "found": true,
+      "nodes_expanded": 46,
+      "nodes_generated": 143,
+      "path_cost": 45,
+      "elapsed_ms": 0.118
+    },
+    "astar": {
+      "found": true,
+      "nodes_expanded": 301,
+      "nodes_generated": 394,
+      "path_cost": 45,
+      "elapsed_ms": 0.791
+    },
+    "greedy": {
+      "found": true,
+      "nodes_expanded": 46,
+      "nodes_generated": 93,
+      "path_cost": 45,
+      "elapsed_ms": 0.133
+    }
+  },
+  "impossible_case": "No solution",
+  "plot": "demo_integration.png"
+}

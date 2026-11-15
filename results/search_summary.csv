@@ -1,0 +1,5 @@
+algorithm,n,found_mean,found_std,nodes_expanded_mean,nodes_expanded_std,nodes_generated_mean,nodes_generated_std,frontier_max_mean,frontier_max_std,path_cost_mean,path_cost_std,elapsed_ms_mean,elapsed_ms_std
+bfs,5,1.0,0.0,4479.8,545.5632,4537.4,546.5833,174.0,30.0998,53.6,1.3416,87.6564,18.8138
+dfs,5,1.0,0.0,55.8,2.0494,187.2,4.3243,132.4,2.6077,54.6,1.8166,0.186,0.0585
+astar,5,1.0,0.0,502.0,413.8689,1190.4,490.8124,690.4,79.3555,53.6,1.3416,1.5928,1.1496
+greedy,5,1.0,0.0,58.8,4.6043,276.0,5.1478,218.2,7.5299,53.6,1.3416,0.2386,0.0285

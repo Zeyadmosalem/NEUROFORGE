@@ -1,0 +1,9 @@
+seed,agent,mode,attempts,win_rate,brier,mean_difficulty,after_20_brier,after_20_win_rate,online_updates,forget_events,batch_loss_first,batch_loss_last,origin
+7,bfs,no_forgetting,22,0.9545454545454546,0.325609,0.8583524318818436,0.0003015,1,2,0,6.995609,0.451311,search_agent_simulation_NOT_human
+7,dfs,no_forgetting,22,0.7727272727272727,0.2775696818181818,0.8340972752737459,0.0519555,1,2,0,4.655499,0.555335,search_agent_simulation_NOT_human
+7,astar,no_forgetting,22,1,0.29490740909090907,0.8905971479500892,5e-07,1,2,0,7.070144,0.002023,search_agent_simulation_NOT_human
+7,greedy,no_forgetting,22,0.9090909090909091,0.3795415,0.8709097275273746,0.058813500000000005,1,2,0,7.010548,1.121714,search_agent_simulation_NOT_human
+7,bfs,partial_forgetting,22,1,0.6552892272727273,0.8568245480010186,0.0768085,1,2,2,6.995609,2.403501,search_agent_simulation_NOT_human
+7,dfs,partial_forgetting,22,0.7272727272727273,0.49078295454545456,0.8463044308632545,0.363875,0.5,2,2,4.655499,1.837068,search_agent_simulation_NOT_human
+7,astar,partial_forgetting,22,1,0.39648672727272727,0.8890692640692641,0.4117605,1,2,2,7.070144,0.47041,search_agent_simulation_NOT_human
+7,greedy,partial_forgetting,22,0.8181818181818182,0.4196569090909091,0.8592118665648077,0.4952205,0.5,2,2,7.010548,0.590542,search_agent_simulation_NOT_human

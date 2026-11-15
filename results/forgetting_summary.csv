@@ -1,0 +1,9 @@
+mode,agent,n_seeds,win_rate_mean,win_rate_std,brier_mean,brier_std,after_20_brier_mean,after_20_brier_std,after_20_win_rate_mean,after_20_win_rate_std
+no_forgetting,bfs,1,0.95455,0.0,0.32561,0.0,0.0003,0.0,1,0.0
+no_forgetting,dfs,1,0.77273,0.0,0.27757,0.0,0.05196,0.0,1,0.0
+no_forgetting,astar,1,1,0.0,0.29491,0.0,0.0,0.0,1,0.0
+no_forgetting,greedy,1,0.90909,0.0,0.37954,0.0,0.05881,0.0,1,0.0
+partial_forgetting,bfs,1,1,0.0,0.65529,0.0,0.07681,0.0,1,0.0
+partial_forgetting,dfs,1,0.72727,0.0,0.49078,0.0,0.36388,0.0,0.5,0.0
+partial_forgetting,astar,1,1,0.0,0.39649,0.0,0.41176,0.0,1,0.0
+partial_forgetting,greedy,1,0.81818,0.0,0.41966,0.0,0.49522,0.0,0.5,0.0
