@@ -13,38 +13,44 @@ animating. Static artwork (background, cards, level tiles, text) is rendered
 once and reused, and sprites are interpolated between logical ticks. None of
 this changes what an agent does: every lane still executes exactly the same
 sequence of ticks as the headless engine.
+
+Returns 'manual' (M), 'title' (Esc) or None (window closed).
 """
 from __future__ import annotations
 import gc
 import sys
 import threading
-from math import sin, floor
+from math import sin, floor, log10
 from pathlib import Path
-from random import Random
 from time import perf_counter
 from integration.arena import make_arena, STYLE, ALGORITHMS
+from game import ui
+from game.ui import WIDTH, HEIGHT, PALETTE as P, ALGO_COLORS, ALGO_LABELS
 
-WIDTH, HEIGHT = 1372, 926
-MARGIN, GAP, HEADER, FOOTER = 18, 14, 100, 56
+MARGIN, GAP, HEADER, FOOTER = 14, 10, 62, 40
 CARD_W = (WIDTH - 2*MARGIN - GAP)//2
-CARD_H = (HEIGHT - HEADER - FOOTER - GAP - MARGIN)//2
-TILE = 17
-WORLD_Y = 65              # top of the world viewport inside a card
+CARD_H = (HEIGHT - HEADER - FOOTER - GAP)//2
+TILE = 15
+STRIP = 34                # coloured title strip at the top of a card
+WORLD_X = 8               # world viewport inside a card
+WORLD_Y = STRIP + 4
+WORLD_W = CARD_W - 2*WORLD_X
 WORLD_H = 12*TILE         # enough for all 12 tile rows
-SKY = (10,13,30)
-WHITE = (231,241,251)
-MUTED = (146,158,188)
-THEMES = {
- 'bfs':(89,218,236), 'dfs':(181,121,248),
- 'astar':(111,237,170), 'greedy':(255,117,164)}
+STATS_Y = WORLD_Y + WORLD_H + 16
+REPLANS_X = 396           # x of the replans / events column
+THEMES = ALGO_COLORS
 STYLE_SUMMARY = {
- 'bfs':'WIDE FRONTIER / SHORTEST ACTION PLAN',
- 'dfs':'DEEP EXPLORATION / NONOPTIMAL ROUTE',
- 'astar':'COST + ADMISSIBLE HEURISTIC',
- 'greedy':'HEURISTIC ONLY / GOAL CHASER',
+ 'bfs':'wide frontier, shortest plan',
+ 'dfs':'deep dives, non-optimal route',
+ 'astar':'cost + admissible heuristic',
+ 'greedy':'heuristic only, goal chaser',
 }
 FRAME_WAIT = 0.004        # seconds a frame may wait for the lanes' ticks
 BUSY_BADGE_AFTER = 0.15   # seconds of planning before a lane shows a badge
+PULSE_SECONDS = 0.9       # card border flash after a surprise or a finished attempt
+FOOTER_KEYS = [('Space', 'Pause'), ('+ / -', 'Speed'), ('H', 'Routes'), ('E', 'Surprise'),
+               ('U', 'Surprises on/off'), ('X', 'Glitch'), ('R', 'Restart'), ('M', 'Manual'),
+               ('F1', 'Help'), ('Esc', 'Menu')]
 
 
 class Lane:
@@ -122,70 +128,26 @@ def run_arena(seed=42, persist=True, forget_every=3, forget_fraction=.35,
     gc_was_enabled=gc.isenabled()
     gc.collect();gc.freeze();gc.disable()
     try:
-        screen=pg.display.set_mode((WIDTH,HEIGHT))
-        pg.display.set_caption('NEUROFORGE  //  FOUR AGENTS, FOUR EVOLVING WORLDS')
+        screen=ui.open_window(pg,'NEUROFORGE  //  FOUR AGENTS, FOUR EVOLVING WORLDS')
         clock=pg.time.Clock()
-        fonts={
-            'logo':pg.font.SysFont('dejavusans',31,bold=True),
-            'heading':pg.font.SysFont('dejavusans',20,bold=True),
-            'sub':pg.font.SysFont('dejavusans',15,bold=True),
-            'body':pg.font.SysFont('dejavusans',13),
-            'small':pg.font.SysFont('dejavusans',11),
-            'tiny':pg.font.SysFont('dejavusans',10),
-        }
-        show_paths=True;paused=False;speed=2.0
+        kit=ui.Kit(pg)
+        show_paths=True;paused=False;speed=2.0;show_help=False
         elapsed=0;accumulator=0.0
-        rng=Random(seed)
-        stars=[(rng.random()*WIDTH,rng.random()*120,1+rng.random()*3) for _ in range(120)]
         status='FOUR INDEPENDENT SEARCH AGENTS  //  FOUR PERSONALIZED WORLDS'
-        status_until=0.0
-        text_cache={}
-
-        def text_surface(s, color, face, limit):
-            """Rendered text is reused until the string itself changes."""
-            key=(s,color,face,limit)
-            out=text_cache.get(key)
-            if out is None:
-                if len(text_cache)>4000:text_cache.clear()
-                font=fonts[face]
-                out=font.render(s,True,color)
-                if limit is not None and out.get_width()>limit:
-                    string=s
-                    while string and font.size(string+'...')[0]>limit:
-                        string=string[:-1]
-                    out=font.render(string+'...',True,color)
-                text_cache[key]=out
-            return out
-
-        def txt(s, pos, color=WHITE, face='body', anchor='left', limit=None, surface=None):
-            dest=screen if surface is None else surface
-            out=text_surface(str(s),color,face,limit)
-            x,y=pos
-            if anchor=='center':x-=out.get_width()//2
-            elif anchor=='right':x-=out.get_width()
-            dest.blit(out,(int(x),int(y)))
-
-        def rr(surface,color,rect,radius=10,border=0):
-            pg.draw.rect(surface,color,rect,width=border,border_radius=radius)
+        status_until=4.0
 
         def build_background():
             """Everything that never changes: sky, stars, header and footer."""
+            backdrop=ui.Backdrop(pg,seed=seed,planet=(-400,-400))   # no planet behind the header
             bg=pg.Surface((WIDTH,HEIGHT)).convert()
-            bg.fill(SKY)
-            # calm star field + identity stripes
-            for x,y,r in stars:
-                pg.draw.circle(bg,(35,49,84),(int(x),int(y)),int(r))
-            pg.draw.line(bg,(61,83,124),(MARGIN,89),(WIDTH-MARGIN,89),1)
-            txt('NEUROFORGE', (MARGIN+5,17),(119,226,239),'logo',surface=bg)
-            txt('THE FOUR MINDS EXPERIMENT', (MARGIN+6,61),MUTED,'sub',surface=bg)
-            txt('BFS  /  DFS  /  A*  /  GREEDY', (WIDTH-28,20),WHITE,'heading','right',surface=bg)
-            txt('World surprises invalidate routes: agents observe changes and replan live.',
-                (WIDTH-29,60),MUTED,'body','right',surface=bg)
-            rr(bg,(18,23,46),(MARGIN,HEIGHT-FOOTER+6,WIDTH-2*MARGIN,FOOTER-14),10)
-            txt('SPACE  PAUSE    +/- SPEED    H  ROUTES    U  RANDOM WORLD ON/OFF    E  SURPRISE NOW',
-                (MARGIN+14,HEIGHT-FOOTER+14),WHITE,'body',surface=bg)
-            txt('D  GLITCH ON/OFF    X  GLITCH NOW    M  MANUAL    R  RESTART    S  SAVE    ESC  EXIT',
-                (MARGIN+14,HEIGHT-FOOTER+34),MUTED,'small',surface=bg)
+            backdrop.draw(bg,0.0,0.0)
+            shade=pg.Surface((WIDTH,HEIGHT),pg.SRCALPHA);shade.fill((6,8,22,110))
+            bg.blit(shade,(0,0))
+            logo=kit.glow_text(bg,'NEUROFORGE',(MARGIN+4,HEADER//2),P['cyan'],'h1','midleft',strength=130)
+            kit.text(bg,'ARENA  //  FOUR SEARCH MINDS',(logo.right+14,HEADER//2+1),P['muted'],'h3','midleft')
+            band=pg.Surface((WIDTH,FOOTER),pg.SRCALPHA);band.fill((6,8,22,200))
+            bg.blit(band,(0,HEIGHT-FOOTER))
+            kit.chips_row(bg,FOOTER_KEYS,HEIGHT-FOOTER+9)
             return bg
 
         background=build_background()
@@ -195,22 +157,28 @@ def run_arena(seed=42, persist=True, forget_every=3, forget_fraction=.35,
             algo=ALGORITHMS[n];color=THEMES[algo]
             box=(MARGIN+(n%2)*(CARD_W+GAP),HEADER+(n//2)*(CARD_H+GAP))
             card=pg.Surface((CARD_W,CARD_H),pg.SRCALPHA)
-            rr(card,(20,25,49),card.get_rect(),14)
-            rr(card,(69,79,111),card.get_rect().inflate(-1,-1),13,1)
-            rr(card,(*color,25),(0,0,CARD_W,73),13)
-            pg.draw.rect(card,color,(0,0,5,CARD_H),border_radius=2)
-            txt(STYLE[algo]['title'],(16,9),color,'heading',surface=card)
-            txt(STYLE_SUMMARY[algo],(16,41),MUTED,'small',surface=card)
-            txt(algo.upper(),(CARD_W-14,12),WHITE,'sub','right',surface=card)
-            pg.draw.rect(card,(16,23,46),(7,WORLD_Y,CARD_W-14,WORLD_H),border_radius=6)
-            rr(card,(32,40,65),(12,WORLD_Y+WORLD_H+9,CARD_W-24,6),3)
+            pg.draw.rect(card,(*P['panel'],240),card.get_rect(),border_radius=14)
+            pg.draw.rect(card,(*color,38),(0,0,CARD_W,STRIP),
+                         border_top_left_radius=14,border_top_right_radius=14)
+            pg.draw.rect(card,color,(0,9,4,STRIP-18),border_radius=2)
+            title=kit.text(card,STYLE[algo]['title'],(16,STRIP//2),color,'h2','midleft')
+            kit.text(card,STYLE_SUMMARY[algo],(title.right+12,STRIP//2+1),P['muted'],'small','midleft')
+            badge=ALGO_LABELS[algo]
+            badge_w=kit.fonts['key'].size(badge)[0]+20
+            kit.pill(card,(CARD_W-14-badge_w//2,STRIP//2),badge,color,fill=color)
+            pg.draw.rect(card,(11,14,34),(WORLD_X,WORLD_Y,WORLD_W,WORLD_H),border_radius=8)
+            pg.draw.rect(card,P['panel_hi'],(WORLD_X,WORLD_Y+WORLD_H+5,WORLD_W,4),border_radius=2)
+            for x,label in ((14,'WINS / LOSSES'),(128,'NN P(WIN)'),(232,'NODES EXPANDED'),
+                            (REPLANS_X,'REPLANS / EVENTS')):
+                kit.text(card,label,(x,STATS_Y+22),P['dim'],'tiny')
             base=pg.Surface((CARD_W,CARD_H)).convert()
             base.blit(background,(0,0),(box[0],box[1],CARD_W,CARD_H))
             base.blit(card,(0,0))
             panel=base.copy()
-            txt('GENERATING WORLD ...',(CARD_W//2,WORLD_Y+WORLD_H//2-8),MUTED,'sub','center',surface=panel)
+            kit.text(panel,'GENERATING WORLD ...',(CARD_W//2,WORLD_Y+WORLD_H//2),P['muted'],'h2','center')
             return {'box':box,'color':color,'base':base,'panel':panel,
-                    'level':None,'tiles':None,'coins':()}
+                    'level':None,'tiles':None,'coins':(),
+                    'seen':None,'pulse_until':0.0,'pulse_color':color}
 
         views=[build_view(n) for n in range(len(ALGORITHMS))]
 
@@ -224,25 +192,20 @@ def run_arena(seed=42, persist=True, forget_every=3, forget_fraction=.35,
                     tile=level.tile(xx,yy)
                     posy=yy*TILE
                     if tile=='#':
-                        rr(layer,(46,49,80),(sx,posy,TILE,TILE),2)
+                        pg.draw.rect(layer,P['tile'],(sx,posy,TILE,TILE))
                         if not level.solid(xx,yy-1):
-                            rr(layer,(60,157,153),(sx,posy,TILE,4),1)
+                            pg.draw.rect(layer,P['tile_top'],(sx,posy,TILE,4),border_radius=1)
                         if (xx+yy)%3==0:
-                            pg.draw.line(layer,(65,66,98),(sx+3,posy+TILE-5),(sx+TILE-4,posy+TILE-5))
+                            pg.draw.line(layer,P['tile_line'],(sx+3,posy+TILE-4),(sx+TILE-4,posy+TILE-4))
                     elif tile=='^':
                         for part in range(2):
                             points=[(sx+part*TILE//2+1,posy+TILE),
                                     (sx+part*TILE//2+TILE//4,posy+3),
                                     (sx+(part+1)*TILE//2,posy+TILE)]
-                            pg.draw.polygon(layer,(239,86,127),points)
+                            pg.draw.polygon(layer,P['spike'],points)
                     elif tile=='o':
                         coins.append((xx,yy))
             return layer,tuple(coins)
-
-        def lerp_cell(a,b,alpha):
-            """Blend two grid positions; snap when they are not one continuous move."""
-            if abs(b[0]-a[0])>2 or abs(b[1]-a[1])>4:return b
-            return a[0]+(b[0]-a[0])*alpha,a[1]+(b[1]-a[1])*alpha
 
         def draw_panel(view,agent,t,alpha):
             algo=agent.algorithm;color=view['color']
@@ -252,101 +215,106 @@ def run_arena(seed=42, persist=True, forget_every=3, forget_fraction=.35,
             if view['level'] is not level:
                 view['level']=level
                 view['tiles'],view['coins']=build_tiles(level)
-            txt(f'WORLD  {agent.stages:02}',(CARD_W-14,41),MUTED,'small','right',surface=p)
+            seen=(agent.total_surprises,agent.wins,agent.losses)
+            if view['seen'] is not None and seen!=view['seen']:
+                old=view['seen']
+                view['pulse_until']=t+PULSE_SECONDS
+                view['pulse_color']=(P['pink'] if seen[0]!=old[0] else
+                                     P['green'] if seen[1]!=old[1] else P['red'])
+            view['seen']=seen
+            world_label=f'WORLD {agent.stages:02}'
+            badge_w=kit.fonts['key'].size(ALGO_LABELS[algo])[0]+20
+            kit.text(p,world_label,(CARD_W-24-badge_w,STRIP//2),P['muted'],'tiny','midright')
             wy=WORLD_Y
-            world_height=WORLD_H
-            view_w=CARD_W-24
             full_w=level.width*TILE
             # Sprites glide from the previous logical state to the current one.
             state=agent.state;prev=agent.prev
-            fx,fy=lerp_cell((prev.x,prev.y),(state.x,state.y),alpha)
-            camera=max(0,min(max(0,full_w-view_w),fx*TILE-view_w*0.35))
-            ox=floor(12-camera)   # one shared integer scroll offset: no tile/sprite shimmer
-            for yy in range(4):
-                offset=(yy*17+camera*0.11*(yy+1))%(view_w+210)
-                pg.draw.circle(p,(26+yy*4,43+yy*4,70+yy*2),
-                               (int((view_w-offset)%(view_w+100)),wy+25+yy*43),35+yy*13,2)
-            # vertical grid accent reinforces procedural chunks and independent levels
+            fx,fy=ui.lerp_cell((prev.x,prev.y),(state.x,state.y),alpha)
+            camera=max(0,min(max(0,full_w-WORLD_W),fx*TILE-WORLD_W*0.35))
+            ox=floor(WORLD_X-camera)   # one shared integer scroll offset: no tile/sprite shimmer
+            p.set_clip(pg.Rect(WORLD_X,WORLD_Y,WORLD_W,WORLD_H))
+            # chunk boundaries: each world is a sequence of CSP-chosen chunks
             chunks=level.chunks
             for k in range(len(chunks)+1):
                 xx=ox+k*8*TILE
-                if 8<=xx<CARD_W-8:
-                    pg.draw.line(p,(36,55,80),(xx,wy+1),(xx,wy+world_height-1))
+                if WORLD_X<=xx<CARD_W-WORLD_X:
+                    pg.draw.line(p,(30,40,72),(xx,wy+1),(xx,wy+WORLD_H-1))
                     if k<len(chunks):
-                        txt(chunks[k][:10].upper(),(xx+5,wy+4),(88,110,139),'tiny',surface=p)
+                        kit.text(p,chunks[k][:12].upper(),(xx+5,wy+4),(70,86,124),'tiny')
             p.blit(view['tiles'],(ox,wy))
             collected=agent.coins
             for xx,yy in view['coins']:
                 sx=ox+xx*TILE
                 if -TILE<=sx<=CARD_W and (xx,yy) not in collected:
                     py=wy+yy*TILE+TILE//2+int(sin(t*5+xx)*2)
-                    pg.draw.circle(p,(250,212,124),(sx+TILE//2,py),4,2)
+                    pg.draw.circle(p,P['gold'],(sx+TILE//2,py),4,2)
             # The world can change mid-run. Draw the actual phase-dependent
             # obstacles used by physics, not an unrelated visual animation.
             phase=state.phase;before=prev.phase
             for platform in level.platforms:
-                mx,my=lerp_cell(platform.position(before),platform.position(phase),alpha)
+                mx,my=ui.lerp_cell(platform.position(before),platform.position(phase),alpha)
                 px=ox+int(mx*TILE);py=int(wy+my*TILE)
                 if -platform.width*TILE<px<CARD_W:
-                    rr(p,(89,194,217),(px,py,platform.width*TILE,TILE//2),4)
-                    rr(p,(201,246,249),(px+2,py+1,platform.width*TILE-4,3),2)
-                    for bolt in range(platform.width):
-                        pg.draw.circle(p,(27,78,108),(px+8+bolt*TILE,py+7),2)
+                    pg.draw.rect(p,(89,194,217),(px,py,platform.width*TILE,TILE//2),border_radius=4)
+                    pg.draw.rect(p,(201,246,249),(px+2,py+1,platform.width*TILE-4,2),border_radius=1)
             for enemy in level.enemies:
-                mx,my=lerp_cell(enemy.position(before),enemy.position(phase),alpha)
+                mx,my=ui.lerp_cell(enemy.position(before),enemy.position(phase),alpha)
                 px=ox+int(mx*TILE)+TILE//2;py=int(wy+my*TILE)+TILE//2
                 if -TILE<px<CARD_W+TILE:
                     pg.draw.circle(p,(239,94,130),(px,py),TILE//2)
-                    pg.draw.circle(p,(253,202,194),(px-2,py-2),3)
+                    pg.draw.circle(p,(253,226,220),(px-2,py-2),3)
                     pg.draw.circle(p,(42,37,78),(px-1,py-2),1)
-                    pg.draw.line(p,(255,163,136),(px-5,py+5),(px+5,py+5),2)
             for gate in level.gates:
                 gx=ox+gate.x*TILE+TILE//2
                 if -TILE<gx<CARD_W+TILE:
                     active=gate.active(phase)
-                    gate_color=(255,80,151) if active else (78,102,137)
-                    pg.draw.line(p,gate_color,(gx,wy+gate.y_top*TILE),
-                                 (gx,wy+(gate.y_bottom+1)*TILE),4 if active else 2)
-                    pg.draw.circle(p,(255,185,198) if active else (89,108,143),
-                                   (gx,wy+gate.y_top*TILE),4)
+                    top=wy+gate.y_top*TILE;bottom=wy+(gate.y_bottom+1)*TILE
+                    if active:
+                        pg.draw.line(p,(120,30,80),(gx,top),(gx,bottom),7)
+                        pg.draw.line(p,(255,120,180),(gx,top),(gx,bottom),3)
+                    else:
+                        for yy in range(top,bottom,8):
+                            pg.draw.line(p,(78,102,137),(gx,yy),(gx,min(bottom,yy+4)),2)
             if show_paths and agent.plan.found:
                 path=agent.plan.path[max(0,agent.plan_index):]
                 if path:
                     half=TILE//2;cx=ox+half;cy=wy-TILE+half
                     coords=[(cx+s.x*TILE,cy+s.y*TILE) for s in path]
-                    if len(coords)>1:pg.draw.lines(p,color,False,coords,2)
-                    for px,py in coords[::4]:
-                        if 5<=px<=CARD_W-5:
-                            pg.draw.circle(p,color,(px,py),2)
+                    if len(coords)>1:
+                        pg.draw.lines(p,(10,12,30),False,coords,4)
+                        pg.draw.lines(p,color,False,coords,2)
             gx=ox+level.goal_x*TILE
             if 0<gx<CARD_W:
-                py=wy+9*TILE-13
-                pg.draw.ellipse(p,(108,221,201),(gx,py-19,24,51),3)
-                pg.draw.circle(p,(230,230,255),(gx+12,py+7),8,2)
+                py=wy+(level.height-2)*TILE-22
+                r=3*sin(t*4)
+                pg.draw.ellipse(p,P['cyan'],(gx-2-r/2,py-18-r,22+r,40+2*r),2)
+                pg.draw.ellipse(p,(239,182,255),(gx+4,py-8,10,20),2)
             # individual sprite; color changes with search method
             px=ox+int(fx*TILE)+TILE//2
             py=int(wy+(fy-1)*TILE)+TILE//2
-            pg.draw.circle(p,color,(px,py),14,2)
-            rr(p,(20,31,58),(px-7,py-8,14,18),5)
-            rr(p,color,(px-7,py-8,14,18),5,2)
-            rr(p,(227,251,254),(px-5,py-4,10,6),2)
-            pg.draw.circle(p,(23,36,71),(px-1,py-1),1)
-            pg.draw.circle(p,(23,36,71),(px+3,py-1),1)
-            # player progress line / difficulty bar (the track is part of the card)
-            info_y=wy+world_height+9
-            rr(p,color,(12,info_y,max(2,int((CARD_W-24)*fx/max(1,level.goal_x))),6),3)
-            stats_y=info_y+16
-            txt(f'W {agent.wins:02}   L {agent.losses:02}',(14,stats_y),WHITE,'sub',surface=p)
-            txt(f'DIFF {level.difficulty:.2f}   TARGET {agent.controller.challenge:.2f}',
-                (CARD_W//2+5,stats_y),color,'body',surface=p)
-            txt(f'EXP {agent.plan.expanded:04}   REPLANS {agent.replans:02}   EVENTS {agent.surprise_count}',(14,stats_y+22),MUTED,'small',surface=p)
-            txt(f'NN P(WIN) {agent.choice.predicted_win:.0%}',(CARD_W//2+5,stats_y+22),WHITE,'small',surface=p)
+            pg.draw.circle(p,ui.mix(P['panel'],color,0.35),(px,py),13)
+            pg.draw.rect(p,(20,31,58),(px-6,py-8,12,16),border_radius=4)
+            pg.draw.rect(p,color,(px-6,py-8,12,16),width=2,border_radius=4)
+            pg.draw.rect(p,(227,251,254),(px-4,py-4,9,5),border_radius=2)
+            p.set_clip(None)
+            # progress along the level (the track is part of the card)
+            frac=fx/max(1,level.goal_x)
+            pg.draw.rect(p,color,(WORLD_X,WORLD_Y+WORLD_H+5,max(4,int(WORLD_W*min(1,frac))),4),border_radius=2)
+            # statistics
+            y=STATS_Y
+            kit.text(p,f'{agent.wins:02} / {agent.losses:02}',(14,y),P['text'],'numsm')
+            kit.text(p,f'{agent.choice.predicted_win:.0%}',(128,y),color,'numsm')
+            expanded=agent.plan.expanded
+            value=kit.text(p,f'{expanded:,}',(232,y),P['text'],'numsm')
+            kit.bar(p,(value.right+8,y+8,max(30,REPLANS_X-24-value.right-8),6),
+                    log10(expanded+1)/log10(24001),ui.mix(P['panel_hi'],color,0.8))
+            kit.text(p,f'{agent.replans} / {agent.surprise_count}',(REPLANS_X,y),P['text'],'numsm')
+            kit.text(p,f'{level.difficulty:.2f}',(CARD_W-14,y),ui.mix(P['green'],P['pink'],level.difficulty),
+                     'numsm','topright')
+            kit.text(p,f'DIFF / TARGET {agent.controller.challenge:.2f}',(CARD_W-14,y+22),P['dim'],
+                     'tiny','topright')
             ad=agent.controller.adapter
-            txt(f'ONLINE {ad.updates}  |  NEW {len(ad.pending)}/10',
-                (14,stats_y+41),color,'body',surface=p)
             to_forget=(ad.forget_every-(ad.updates%ad.forget_every))*ad.batch_size-len(ad.pending)
-            txt(f'MEMORY DROP IN {to_forget:02} ATTEMPTS',
-                (CARD_W//2+5,stats_y+41),(255,181,116) if ad.forgetting_enabled else MUTED,'small',surface=p)
             outcome=agent.last_event
             if ad.recovery_updates_remaining:
                 outcome=(f'RE-LEARNING / BOOST x{ad.recovery_boost:g} / '
@@ -354,8 +322,14 @@ def run_arena(seed=42, persist=True, forget_every=3, forget_fraction=.35,
             recent=ad.last_forget_event
             if recent and recent['observations']==ad.observations:
                 outcome=f"MEMORY GLITCH: {recent['erased_count']} COEFFICIENTS ERASED"
-            txt(outcome,(14,CARD_H-18),(255,192,123) if ('MEMORY' in outcome or 'RE-LEARNING' in outcome) else MUTED,
-                'small',limit=CARD_W-28,surface=p)
+            hot=('MEMORY' in outcome or 'RE-LEARNING' in outcome)
+            surprise=outcome.startswith('SURPRISE')
+            online=(f'ONLINE {ad.updates}  |  NEW {len(ad.pending)}/10  |  '
+                    + (f'DROP IN {to_forget:02}' if ad.forgetting_enabled else 'GLITCHES OFF'))
+            right=kit.text(p,online,(CARD_W-14,CARD_H-14),P['gold'] if ad.forgetting_enabled else P['dim'],
+                           'tiny','midright')
+            kit.text(p,outcome,(14,CARD_H-14),P['gold'] if hot else P['pink'] if surprise else P['muted'],
+                     'small','midleft',width=right.left-34)
 
         def start_build(build_seed,surprises):
             """Create four agents (levels + first plans) without freezing the window."""
@@ -376,6 +350,19 @@ def run_arena(seed=42, persist=True, forget_every=3, forget_fraction=.35,
             for lane in lanes:lane.deferred.append((action,results))
             if report is not None:reports.append((results,len(lanes),report))
 
+        def draw_header():
+            if elapsed<status_until:
+                fade=255*min(1.0,(status_until-elapsed)*2)
+                kit.text(screen,status,(WIDTH//2+40,HEADER//2),P['gold'],'h3','center',alpha=fade,width=470)
+            x=WIDTH-MARGIN
+            for label,color in ((('PAUSED' if paused else 'LIVE'),P['pink'] if paused else P['green']),
+                                (f'{speed:g}x',P['text']),
+                                ('SURPRISES '+('ON' if surprises_on else 'OFF'),P['pink'] if surprises_on else P['dim']),
+                                ('GLITCHES '+('ON' if forgetting_on else 'OFF'),P['gold'] if forgetting_on else P['dim'])):
+                w=kit.fonts['key'].size(label)[0]+20
+                kit.pill(screen,(x-w//2,HEADER//2),label,color,fill=color if label in ('LIVE','PAUSED') else None)
+                x-=w+8
+
         build=start_build(seed,True)
         build_status=None
         reports=[]                 # (results, expected count, message builder)
@@ -391,6 +378,7 @@ def run_arena(seed=42, persist=True, forget_every=3, forget_fraction=.35,
                 if lanes:gc.collect()   # restart: the one moment a pause is invisible
                 lanes=[Lane(agent) for agent in build['lanes']]
                 reports.clear();accumulator=0.0
+                for view in views:view['seen']=None
                 forgetting_on=lanes[0].agent.controller.adapter.forgetting_enabled
                 surprises_on=lanes[0].agent.surprises
                 if build_status:
@@ -399,8 +387,13 @@ def run_arena(seed=42, persist=True, forget_every=3, forget_fraction=.35,
             for event in pg.event.get():
                 if event.type==pg.QUIT:running=False
                 elif event.type==pg.KEYDOWN:
-                    if event.key==pg.K_ESCAPE:running=False
+                    if show_help:
+                        if event.key in (pg.K_ESCAPE,pg.K_F1):show_help=False
+                        continue
+                    if event.key==pg.K_ESCAPE:return 'title'
                     elif event.key==pg.K_m:return 'manual'
+                    elif event.key==pg.K_F1:show_help=True
+                    elif event.key==pg.K_F11:ui.toggle_fullscreen(pg)
                     elif event.key==pg.K_SPACE:paused=not paused
                     elif event.key in (pg.K_EQUALS,pg.K_PLUS,pg.K_KP_PLUS,pg.K_RIGHTBRACKET):
                         speed=min(32.0,speed*2)
@@ -446,7 +439,7 @@ def run_arena(seed=42, persist=True, forget_every=3, forget_fraction=.35,
                         build_status='FOUR AGENTS RESTARTED'
                         status='GENERATING FOUR NEW WORLDS ...';status_until=elapsed+30
             ticks=0
-            if lanes and not paused:
+            if lanes and not paused and not show_help:
                 accumulator+=dt*10*speed
                 while accumulator>=1 and ticks<42:
                     accumulator-=1
@@ -472,20 +465,27 @@ def run_arena(seed=42, persist=True, forget_every=3, forget_fraction=.35,
             alpha=min(1.0,accumulator)
             now=perf_counter()
             screen.blit(background,(0,0))
-            if elapsed<status_until:
-                txt(status,(WIDTH//2,76),(255,205,122),'small','center')
+            draw_header()
             for n,view in enumerate(views):
                 lane=lanes[n] if n<len(lanes) else None
                 if lane is not None and lane.idle.is_set():
                     draw_panel(view,lane.agent,elapsed,alpha)
                 screen.blit(view['panel'],view['box'])
+                x0,y0=view['box']
+                card=pg.Rect(x0,y0,CARD_W,CARD_H)
+                left=view['pulse_until']-elapsed
+                if left>0:
+                    pg.draw.rect(screen,ui.mix(P['line'],view['pulse_color'],left/PULSE_SECONDS),card,
+                                 width=2,border_radius=14)
+                else:
+                    pg.draw.rect(screen,P['line'],card,width=1,border_radius=14)
                 if lane is not None and not lane.idle.is_set() and now-lane.busy_since>BUSY_BADGE_AFTER:
-                    x0,y0=view['box']
-                    rr(screen,(20,25,49),(x0+CARD_W//2-52,y0+WORLD_Y+6,104,20),8)
-                    txt('PLANNING ...',(x0+CARD_W//2,y0+WORLD_Y+9),view['color'],'small','center')
-            txt(f'{speed:g}x  /  {"PAUSED" if paused else "LIVE"}',
-                (WIDTH-MARGIN-13,HEIGHT-FOOTER+23),THEMES['astar'] if not paused else THEMES['greedy'],
-                'sub','right')
+                    kit.pill(screen,(x0+CARD_W//2,y0+WORLD_Y+16),'PLANNING ...',view['color'])
+            if paused and not show_help:
+                kit.pill(screen,(WIDTH//2,HEADER+CARD_H+GAP//2),'PAUSED  //  SPACE TO RESUME',P['pink'],
+                         face='h3',height=30,pad=16)
+            if show_help:
+                kit.overlay_help(screen,'CONTROLS  //  ARENA',ui.ARENA_HELP)
             pg.display.flip()
     finally:
         for lane in lanes:lane.stop()

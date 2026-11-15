@@ -2,25 +2,30 @@
 
 **A Mario-inspired original neon platformer with BFS, DFS, A*, Greedy, Backtracking CSP/Forward Checking/AC-3, a trainable neural completion predictor, and incremental on-device learning.**
 
-![Illustrative offline four-agent preview](assets/arena_preview.png)
+![The four-agent arena](assets/screenshot_arena.png)
 
-*This preview was rendered offline using actual generated levels and agent states; it is not a capture from Pygame.*
+![Manual mode with the AI Lab dashboard open](assets/screenshot_ai_lab.png)
+
+*Both images are frames rendered by the game itself at its 1280×720 resolution.*
 
 ## Start playing
 
 1. Install Python 3.11+ and open a terminal in this project directory.
 2. Install dependencies: `python -m pip install -r requirements.txt`.
-3. **Integrated demo + manual gameplay:** `python run_demo.py` prints the input level, the CSP counters and the four search solutions, saves the cooperation plot `results/demo_integration.png`, then opens the game. Add `--no-report` to open the game directly, or `--headless` to skip the game.
-4. **Four-agent split-screen AI arena:** `python run_demo.py --arena`
-5. Switch manual → arena with **V**, and arena → manual with **M**.
+3. **Integrated demo + game:** `python run_demo.py` prints the input level, the CSP counters and the four search solutions, saves the cooperation plot `results/demo_integration.png`, then opens the title screen. Choose **Play** (manual game) or **AI Arena**. Add `--no-report` to skip the printed demo, or `--headless` to skip the game.
+4. **Straight into the four-agent arena:** `python run_demo.py --arena`
+5. Switch manual → arena with **V**, arena → manual with **M**, and back to the title screen with **Esc**.
+
+The window is resizable; **F11** toggles fullscreen and **F1** shows every key on screen in any mode.
 
 ### Manual mode controls
 
-- `A/D` or Left/Right arrows — move; `Space/W/Up` — jump
-- `Tab` — AI Laboratory; `1/2/3/4` — BFS/DFS/A*/Greedy visualization
+- `A/D` or Left/Right arrows — move; `Space/W/Up` — jump; `R` — restart the attempt
+- `Tab` — AI Lab dashboard: nodes expanded by all four searches, CSP counters under the four FC/AC-3 settings, and the NN vs rule-baseline win estimate
+- `1/2/3/4` — show the BFS/DFS/A*/Greedy exploration and route on the level
 - `F` — Forward Checking, `C` — AC-3, `G` — generate with current CSP options
 - `N` — neural vs rule-based coach, `X` — manual partial memory glitch
-- `V` — four-agent arena, `R` — restart, `Esc` — quit
+- `V` — four-agent arena, `F1`/`H` — help, `F11` — fullscreen, `Esc` — title screen
 
 ### Arena controls
 
@@ -28,7 +33,7 @@
 - `E` — force an immediate surprise event and watch each affected agent replan
 - `Space` — pause; `+/-` — simulation speed; `H` — toggle planned routes
 - `D` — toggle scheduled partial forgetting; `X` — trigger a memory glitch now
-- `M` — back to manual mode; `R` — restart arena; `S` — screenshot; `Esc` — quit
+- `M` — manual mode; `R` — restart arena; `S` — screenshot; `F1` — help; `Esc` — title screen
 
 **Moving platforms, patrolling enemies and timed gates** are simulated with a time phase shared by the player and planners. The arena also randomly adds spikes, patrols, bridges or coins, and changes the timing of existing moving objects. Each event is checked for survivability; the affected agent observes the change and replans using its own search algorithm. The surprise sequence is reproducible by seed but is not visible to the planner in advance. View [the V3 reactive-world design](docs/V3_REACTIVE_WORLD.md) for limitations.
 
