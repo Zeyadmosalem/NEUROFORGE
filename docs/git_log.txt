@@ -1,0 +1,7 @@
+﻿a1753aa 2026-11-15 Zeyad Salem Add report, presentation, data dictionary and submission tooling
+9d1420f 2026-11-15 Zeyad Salem Add integrated demo with cooperation plot, experiments and results
+e921850 2026-11-15 Zeyad Salem Add adaptive controller, playable game, four-agent arena and world surprises
+2cc0572 2026-11-15 Zeyad Salem Add dataset script with pinned VGLC download, NN, baseline and training
+9984db6 2026-11-15 Zeyad Salem Add CSP level generator: backtracking with switchable FC and AC-3
+28fca11 2026-11-15 Zeyad Salem Add shared tile physics and BFS, DFS, A*, Greedy search with counters
+19f5731 2026-11-15 Zeyad Salem Add project setup: README, pinned requirements, ignore rules
