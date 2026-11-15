@@ -1,0 +1,25 @@
+{
+  "seed": 42,
+  "personas": 250,
+  "attempts_per_persona": 26,
+  "rows": 6500,
+  "level_pool_size": 72,
+  "dataset_kind": "synthetic player-outcome simulation",
+  "features": [
+    "recent_win_rate",
+    "jump_accuracy",
+    "deaths_per_attempt",
+    "recent_progress",
+    "recent_time",
+    "length",
+    "gap_tiles",
+    "max_gap",
+    "hazards",
+    "coins",
+    "platforms",
+    "difficulty"
+  ],
+  "label": "label_win",
+  "split_policy": "persona_id grouped",
+  "source_vglc_note": "independently downloadable real level geometry; NOT source of win outcomes"
+}

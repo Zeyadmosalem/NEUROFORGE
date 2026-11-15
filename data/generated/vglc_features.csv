@@ -1,0 +1,5 @@
+level_name,width,height,solid_tile_fraction,enemy_count,longest_ground_gap
+mario-1-1.txt,202,14,0.12801,15,3
+mario-1-2.txt,158,14,0.2283,22,7
+mario-2-1.txt,197,14,0.12328,32,4
+mario-3-1.txt,197,14,0.13996,29,8

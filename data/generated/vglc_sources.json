@@ -1,0 +1,22 @@
+[
+  {
+    "file": "mario-1-1.txt",
+    "url": "https://raw.githubusercontent.com/TheVGLC/TheVGLC/0e86a8f31f20ecad4eaa5741ff061af88767f7fb/Super%20Mario%20Bros/Processed/mario-1-1.txt",
+    "sha256": "a04d56ae583819ebb39d2205b7322683eabaa2dd4b8b99960ee4243d43de4ac8"
+  },
+  {
+    "file": "mario-1-2.txt",
+    "url": "https://raw.githubusercontent.com/TheVGLC/TheVGLC/0e86a8f31f20ecad4eaa5741ff061af88767f7fb/Super%20Mario%20Bros/Processed/mario-1-2.txt",
+    "sha256": "452cc0dacb4f7d694056f7eaaaa92c5c5ad9b01b257dd1d73bb8465f34d80b31"
+  },
+  {
+    "file": "mario-2-1.txt",
+    "url": "https://raw.githubusercontent.com/TheVGLC/TheVGLC/0e86a8f31f20ecad4eaa5741ff061af88767f7fb/Super%20Mario%20Bros/Processed/mario-2-1.txt",
+    "sha256": "46b6c852051882baed2e0168e333211d7846c002373d03c3673d3301c00ec3a2"
+  },
+  {
+    "file": "mario-3-1.txt",
+    "url": "https://raw.githubusercontent.com/TheVGLC/TheVGLC/0e86a8f31f20ecad4eaa5741ff061af88767f7fb/Super%20Mario%20Bros/Processed/mario-3-1.txt",
+    "sha256": "83375e929561ff0d82b70c50b7dba81de0ab4a550c04244c883d1226b82d68a2"
+  }
+]
