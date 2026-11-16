@@ -2,11 +2,13 @@
 
 **A Mario-inspired original neon platformer with BFS, DFS, A*, Greedy, Backtracking CSP/Forward Checking/AC-3, a trainable neural completion predictor, and incremental on-device learning.**
 
+![Expedition: the isometric pixel-art mode](assets/screenshot_expedition.png)
+
 ![The four-agent arena](assets/screenshot_arena.png)
 
 ![Manual mode with the AI Lab dashboard open](assets/screenshot_ai_lab.png)
 
-*Both images are frames rendered by the game itself at its 1280×720 resolution.*
+*All images are frames rendered by the game itself at its 1280×720 resolution.*
 
 ## Start playing
 

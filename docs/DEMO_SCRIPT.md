@@ -17,6 +17,7 @@
 3. Press `F`, `C` to independently toggle Forward Checking and AC-3; the CSP chart highlights the current setting next to the other three. Press `G` to regenerate the level with those switches and read its backtracks/pruning line.
 4. Press `N` to switch the trained NN and the rule-based baseline; the two gauges show both estimates and which one now picks your next level. Complete or fail a level to change the player profile and compare predictions.
 5. Press `V` (or `Esc` → **AI Arena**) for the four-agent arena; press `E` to force a world surprise and point at the replan counters.
-6. Show `results/experiment_summary.json` and `results/*_plot.png` from reproducible benchmarks. To demonstrate impossibility run the text demo and point to `IMPOSSIBLE CSP: No solution`, and the explicit impossible tests.
+6. `Esc` → **Expedition**: the same three parts on a 2D map. Press `Tab` to show the four routes to the beacon (DFS's long detour is visible on the map) and the room CSP's assignments and backtracks with and without FC/AC-3; point out which alien uses which search.
+7. Show `results/experiment_summary.json` and `results/*_plot.png` from reproducible benchmarks. To demonstrate impossibility run the text demo and point to `IMPOSSIBLE CSP: No solution`, and the explicit impossible tests.
 
 **Demo logistics:** All Python processes should start from the project root. The GUI is optional for algorithmic testing but Pygame CE is required for gameplay. The laboratory overlay visualizes search expansion and a found route on a common deterministic simulation; all counters are real. Toggle `F`/`C` affects subsequent regeneration (`G`), not the level already on-screen. NN toggle affects subsequent level selections.
