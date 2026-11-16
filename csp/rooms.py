@@ -378,6 +378,8 @@ class MapResult:
     search: SearchResult | None
     candidates: int
     reason: str = ''
+    target: float = 0.0
+    csp_seed: int = 0       # seed of the RoomCSP that produced `map` (to re-run it in the AI Lab)
 
 
 def generate_map(seed=42, target=0.5, rows=4, cols=4, forward_checking=True,
@@ -393,6 +395,7 @@ def generate_map(seed=42, target=0.5, rows=4, cols=4, forward_checking=True,
         m = compile_rooms(last_csp.chunks, rows, cols, seed + attempt)
         last_search = solve_grid(m.passable, m.start, m.exit, 'astar')
         if last_search.found:
-            return MapResult(m, last_csp, last_search, attempt + 1)
+            return MapResult(m, last_csp, last_search, attempt + 1, target=target,
+                             csp_seed=seed + attempt * 997)
     return MapResult(None, last_csp, last_search, attempts,
                      'No solution: every candidate map failed verification')

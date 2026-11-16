@@ -108,10 +108,13 @@ def plot_cooperation(ctrl,chosen,search_results,dest):
 def launch_gui(seed=42,arena=False,forget_every=3,forget_fraction=.35,feature_dropout=.12):
     # Plain `python run_demo.py` opens the title screen; --arena skips it.
     mode='arena' if arena else 'title'
-    while mode in ('title','manual','arena'):
+    while mode in ('title','manual','arena','expedition'):
         if mode=='title':
             from game.title import run_title
             mode=run_title(seed)
+        elif mode=='expedition':
+            from game.expedition_app import run_expedition
+            mode=run_expedition(seed)
         elif mode=='arena':
             from game.arena_app import run_arena
             mode=run_arena(seed,forget_every=forget_every,
