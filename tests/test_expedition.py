@@ -64,6 +64,66 @@ def test_generated_maps_are_reachable(seed):
     assert solve_grid(m.passable, m.start, m.exit, 'bfs').found
 
 
+def test_aliens_close_the_distance():
+    from csp.rooms import generate_map
+    from integration.expedition import Expedition
+    m = generate_map(seed=3, target=0.4).map
+    ex = Expedition(m, seed=3, spawning=False)
+    route = solve_grid(m.passable, m.start, m.exit, 'bfs').path
+    for kind, cell in zip(('glob', 'skitter', 'brute'), (route[7], route[9], route[11])):
+        ex.spawn(kind, cell[0] + 0.5, cell[1] + 0.5)
+    before = [abs(a.x - ex.player.x) + abs(a.y - ex.player.y) for a in ex.aliens]
+    for _ in range(45):
+        ex.update(1 / 30)
+    after = [abs(a.x - ex.player.x) + abs(a.y - ex.player.y) for a in ex.aliens]
+    assert len(after) == 3 and all(b < a for a, b in zip(before, after))
+    assert {a.kind: a.algorithm for a in ex.aliens} == {'glob': 'bfs', 'skitter': 'greedy', 'brute': 'astar'}
+
+
+def test_player_following_route_reaches_exit():
+    from csp.rooms import generate_map
+    from integration.expedition import Expedition
+    m = generate_map(seed=5, target=0.3).map
+    ex = Expedition(m, seed=5, spawning=False)
+    route = solve_grid(m.passable, m.start, m.exit, 'astar').path
+    events = []
+    for cx, cy in route:
+        for _ in range(60):
+            dx, dy = cx + 0.5 - ex.player.x, cy + 0.5 - ex.player.y
+            if abs(dx) + abs(dy) < 0.15 or ex.won:
+                break
+            events += ex.update(1 / 30, move=(dx, dy))
+    assert ex.won and not ex.dead
+    assert any(e[0] == 'win' for e in events)
+
+
+def test_shooting_kills_an_alien_and_counts_hits():
+    from csp.rooms import generate_map
+    from integration.expedition import Expedition
+    m = generate_map(seed=5, target=0.3).map
+    ex = Expedition(m, seed=5, spawning=False)
+    ex.spawn('skitter', ex.player.x + 2.5, ex.player.y)
+    ex.aliens[0].frozen = True
+    events = []
+    for _ in range(60):
+        events += ex.update(1 / 30, aim=(1, 0), shoot=True)
+    assert ex.kills == 1 and ex.hits >= 1 and ex.shots >= ex.hits
+    assert any(e[0] == 'kill' for e in events)
+
+
+def test_director_scores_maps_and_learns():
+    from integration.expedition import ExpeditionDirector, map_features
+    d = ExpeditionDirector(seed=9)
+    choice = d.next_map(n_candidates=3)
+    assert choice.map is not None and 0 <= choice.predicted_win <= 1
+    feats = map_features(choice.map)
+    assert {'length', 'gap_tiles', 'max_gap', 'hazards', 'coins', 'platforms', 'difficulty'} <= set(feats)
+    before = d.controller.challenge
+    d.record(True, 30.0, shots=20, hits=12, progress=1.0)
+    assert d.controller.challenge > before
+    assert len(d.controller.adapter.pending) == 1
+
+
 def test_bfs_distance_field():
     field = bfs_distance_field(open_cell, (0, 0), 6, 6)
     assert field[(0, 0)] == 0 and field[(5, 0)] == 5 and field[(5, 5)] == 10
