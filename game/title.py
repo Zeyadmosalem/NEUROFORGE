@@ -9,7 +9,6 @@ from game import ui
 from game.ui import WIDTH, HEIGHT, PALETTE as P, ALGO_COLORS
 
 MENU = (
-    ('EXPEDITION', 'Isometric alien shooter: a CSP builds the map, search drives the aliens', 'expedition'),
     ('PLAY', 'Run and jump through levels the AI builds for you', 'manual'),
     ('AI ARENA', 'Watch BFS, DFS, A* and Greedy race and replan live', 'arena'),
     ('HELP', 'Every key in one place', 'help'),
@@ -36,8 +35,8 @@ def run_title(seed=42):
         start = monotonic()
         buttons = []
         for n in range(len(MENU)):
-            rect = pg.Rect(0, 0, 360, 46)
-            rect.center = (WIDTH // 2, 358 + n * 54)
+            rect = pg.Rect(0, 0, 360, 52)
+            rect.center = (WIDTH // 2, 392 + n * 62)
             buttons.append(rect)
 
         def choose(index):
@@ -68,8 +67,6 @@ def run_title(seed=42):
                         result = choose(selected)
                         if result != 'stay':
                             return result
-                    elif event.key in (pg.K_3, pg.K_e):
-                        return 'expedition'
                     elif event.key in (pg.K_1, pg.K_p):
                         return 'manual'
                     elif event.key in (pg.K_2, pg.K_a, pg.K_v):

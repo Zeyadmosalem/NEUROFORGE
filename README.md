@@ -2,41 +2,21 @@
 
 **A Mario-inspired original neon platformer with BFS, DFS, A*, Greedy, Backtracking CSP/Forward Checking/AC-3, a trainable neural completion predictor, and incremental on-device learning.**
 
-![Expedition: the isometric pixel-art mode](assets/screenshot_expedition.png)
-
 ![The four-agent arena](assets/screenshot_arena.png)
 
 ![Manual mode with the AI Lab dashboard open](assets/screenshot_ai_lab.png)
 
-*All images are frames rendered by the game itself at its 1280×720 resolution.*
+*Both images are frames rendered by the game itself at its 1280×720 resolution.*
 
 ## Start playing
 
 1. Install Python 3.11+ and open a terminal in this project directory.
 2. Install dependencies: `python -m pip install -r requirements.txt`.
-3. **Integrated demo + game:** `python run_demo.py` prints the input level, the CSP counters and the four search solutions, saves the cooperation plot `results/demo_integration.png`, then opens the title screen. Choose **Expedition** (isometric alien shooter), **Play** (platformer) or **AI Arena**. Add `--no-report` to skip the printed demo, or `--headless` to skip the game.
+3. **Integrated demo + game:** `python run_demo.py` prints the input level, the CSP counters and the four search solutions, saves the cooperation plot `results/demo_integration.png`, then opens the title screen. Choose **Play** (manual game) or **AI Arena**. Add `--no-report` to skip the printed demo, or `--headless` to skip the game.
 4. **Straight into the four-agent arena:** `python run_demo.py --arena`
 5. Switch manual → arena with **V**, arena → manual with **M**, and back to the title screen with **Esc**.
 
 The window is resizable; **F11** toggles fullscreen and **F1** shows every key on screen in any mode.
-
-### Expedition mode
-
-An isometric, pixel-art top-down shooter on a **2D map** (the platformer's levels run left to right). The hero is a pixel version of the team's skull logo (`assets/hero_skull.png`). Reach the beacon alive; alien nests spawn waves, armories hold ammo and health, acid hurts.
-
-- `W A S D` — move; mouse — aim; click / hold or `Space` — shoot; `R` — reload
-- `Tab` — AI Lab: routes from you to the beacon by all four searches (drawn on the map) with nodes expanded, the map's room CSP under the four FC/AC-3 settings, and NN vs rule-baseline gauges
-- `N` — neural net vs rule baseline for choosing the next sector; `Enter` — next sector after a win or a death; `F1` — help; `Esc` — title screen
-
-How the three AI parts work here:
-
-| Part | In Expedition |
-|---|---|
-| CSP (`csp/rooms.py`) | A 4×4 grid of rooms. Variables are rooms, values are (template, doors). Binary constraints: facing doors must match, two nests are never adjacent. Global: a difficulty budget, a minimum number of nests for harder targets, and every room connected to the start (pruned on partial assignments). Backtracking with switchable Forward Checking and AC-3; A* then confirms the beacon is reachable. |
-| Search (`search/algorithms.py`) | `graph_search()` runs BFS/DFS/A*/Greedy with the same rules and counters as the platformer search. Globs follow one shared BFS distance field from you, Skitters replan with Greedy, Brutes replan with A*. |
-| NN (`integration/expedition.py`) | The trained player model scores candidate maps through `map_features()`, which maps each map onto the model's 12 inputs within its training ranges. The model was trained on platformer data, so here it is a demonstration, not a validated prediction. Shots and hits stand in for jumps and landings in the player profile. |
-
-![Expedition with the AI Lab open](assets/screenshot_expedition_lab.png)
 
 ### Manual mode controls
 
@@ -113,11 +93,8 @@ python -m pytest tests -v
 | `game/physics.py` | Shared deterministic physical transition function and death/goal conditions |
 | `game/app.py` | Original graphical manual platformer, controls, search laboratory |
 | `game/arena_app.py` | Four-panel search-driven AI arena with real live agents |
-| `game/expedition_app.py`, `game/pixel_art.py` | Expedition: isometric pixel-art renderer, lighting and HUD; sprites built in code from the skull logo |
-| `csp/rooms.py` | Room-grid CSP for Expedition maps (door matching, nests, budget, connectivity) |
-| `integration/expedition.py` | Expedition simulation (player, aliens, nests, pickups) and the NN map director |
 | `game/ui.py`, `game/title.py` | Shared UI kit and the title screen |
-| `search/algorithms.py` | BFS, DFS, A*, Greedy; search metrics and action plans; `graph_search`/`solve_grid` for 2D maps |
+| `search/algorithms.py` | BFS, DFS, A*, Greedy; search metrics and action plans |
 | `csp/solver.py` | Real Backtracking, independently switchable Forward Checking and AC-3 |
 | `csp/generator.py` | Build varied levels and verify real reachability with A* |
 | `data/make_data.py` | Reproducible 6,500-row synthetic initial dataset, optional real VGLC geometry |
@@ -133,6 +110,6 @@ python -m pytest tests -v
 
 The 6,500-row synthetic dataset was divided by *persona*, not row, for held-out evaluation. See `results/training_metrics.json` for exact scores. The logistic baseline currently outperforms the NN on the synthetic test set; claiming otherwise would be inaccurate. The regular five-seed search/CSP/adaptation experiments remain at `results/*_summary.csv`. The supplemental forgetting figure is exploratory and should not be described as evidence of improvement.
 
-Pygame CE and an actual display are needed for the graphical modes. Every screen (title, platformer, AI Lab, arena, Expedition, help) is covered by hidden-window smoke tests in `tests/test_ui_smoke.py` and was opened on a real Windows display.
+Pygame CE and an actual display are needed for the graphical modes. Every screen (title, platformer, AI Lab, arena, help) is covered by hidden-window smoke tests in `tests/test_ui_smoke.py` and was opened on a real Windows display.
 
 See [the complete V2 learning and forgetting guide](docs/ARENA_V2_DESIGN.md), [data dictionary](docs/DATA_DICTIONARY.md), [test matrix](docs/TEST_MATRIX.md), and [research notes](docs/RESEARCH.md). The report (`docs/REPORT.md`, built into the DOCX) and the presentation numbers were updated to the V3 design and the 15 November 2026 results; rebuild both with `python tools/build_submission.py` (needs `python-docx` and `python-pptx`). The personal contribution template must be completed by the actual team.

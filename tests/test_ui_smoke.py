@@ -41,27 +41,8 @@ def test_title_draws_help_and_quits(monkeypatch):
 
 def test_title_enter_starts_the_selected_mode(monkeypatch):
     from game.title import run_title
-    drive(monkeypatch, 60, {3: pg.K_DOWN, 4: pg.K_DOWN, 6: pg.K_RETURN})
+    drive(monkeypatch, 60, {3: pg.K_DOWN, 5: pg.K_RETURN})
     assert run_title(42) == 'arena'
-
-
-def test_title_enter_starts_expedition(monkeypatch):
-    from game.title import run_title
-    drive(monkeypatch, 30, {3: pg.K_RETURN})
-    assert run_title(42) == 'expedition'
-
-
-def test_expedition_draws_lab_help_and_escape_returns_to_title(monkeypatch):
-    from game.expedition_app import run_expedition
-    drive(monkeypatch, 120, {5: pg.K_TAB, 30: pg.K_n, 40: pg.K_F1, 50: pg.K_F1, 60: pg.K_ESCAPE})
-    assert run_expedition(42, persist=False) == 'title'
-
-
-def test_expedition_runs_and_window_close_quits(monkeypatch):
-    from game.expedition_app import run_expedition
-    count = drive(monkeypatch, 90, {10: pg.K_r})
-    assert run_expedition(7, persist=False) is None
-    assert count[0] >= 90
 
 
 def test_manual_game_draws_lab_help_and_model_switch(monkeypatch):
